@@ -1,6 +1,6 @@
 """
-Фільтри та панель налаштувань для B2B Lead Intelligence Dashboard.
-Підтримує пошук, фільтрацію за статусом, країною та скринькою (Пошта 1 / Пошта 2).
+Filter and controls sidebar for B2B Lead Intelligence Dashboard.
+Supports full-text search and multi-dimensional filtering by status, region, and inbox slot.
 """
 
 import flet as ft
@@ -23,7 +23,7 @@ from ui.theme import (
 )
 
 class DashboardSidebar(ft.Container):
-    def __init__(self, on_filter_change, current_status="Всі", current_country="Всі", current_inbox="Всі"):
+    def __init__(self, on_filter_change, current_status="All", current_country="All", current_inbox="All"):
         super().__init__(
             width=280,
             bgcolor=BG_SURFACE,
@@ -40,7 +40,7 @@ class DashboardSidebar(ft.Container):
     def build_ui(self):
         # 1. Search Box
         search_box = ft.TextField(
-            hint_text="Пошук компанії чи ОПР...",
+            hint_text="Search company or decision maker...",
             prefix_icon=ft.Icons.SEARCH_ROUNDED,
             dense=True,
             text_size=FONT_BODY,
@@ -50,8 +50,8 @@ class DashboardSidebar(ft.Container):
             on_change=self._handle_search
         )
 
-        # 2. Inbox Slot Selector (Пошта 1 / Пошта 2)
-        inbox_options = ["Всі", "Пошта 1", "Пошта 2"]
+        # 2. Inbox Slot Selector (Inbox 1 / Inbox 2)
+        inbox_options = ["All", "Inbox 1", "Inbox 2"]
         inbox_chips = []
         for ib in inbox_options:
             is_active = (self.current_inbox == ib)
@@ -72,10 +72,10 @@ class DashboardSidebar(ft.Container):
 
         # 3. Status Filters
         status_items = [
-            ("Всі", ft.Icons.ALL_INCLUSIVE_ROUNDED, COLOR_PRIMARY),
-            ("Не відправлено", ft.Icons.SCHEDULE_ROUNDED, COLOR_WARNING),
-            ("Відправлено", ft.Icons.SEND_ROUNDED, COLOR_INDIGO),
-            ("Отримано відповідь", ft.Icons.MARK_CHAT_READ_ROUNDED, COLOR_SUCCESS),
+            ("All", ft.Icons.ALL_INCLUSIVE_ROUNDED, COLOR_PRIMARY),
+            ("Draft", ft.Icons.SCHEDULE_ROUNDED, COLOR_WARNING),
+            ("Sent", ft.Icons.SEND_ROUNDED, COLOR_INDIGO),
+            ("Replied", ft.Icons.MARK_CHAT_READ_ROUNDED, COLOR_SUCCESS),
         ]
         status_buttons = []
         for st_name, icon, color in status_items:
@@ -98,7 +98,7 @@ class DashboardSidebar(ft.Container):
             status_buttons.append(btn)
 
         # 4. Country Filters
-        countries = ["Всі", "ЄС", "UK", "Україна"]
+        countries = ["All", "EU", "UK", "Ukraine"]
         country_chips = []
         for c in countries:
             is_active = (self.current_country == c)
@@ -126,29 +126,29 @@ class DashboardSidebar(ft.Container):
             content=ft.Column([
                 ft.Row([
                     ft.Icon(ft.Icons.SECURITY_ROUNDED, color=COLOR_INDIGO, size=16),
-                    ft.Text("2-Step No-Link Протокол", size=FONT_CAPTION, weight=ft.FontWeight.BOLD, color=COLOR_INDIGO)
+                    ft.Text("2-Step No-Link Protocol", size=FONT_CAPTION, weight=ft.FontWeight.BOLD, color=COLOR_INDIGO)
                 ], spacing=4),
-                ft.Text("• 2 скриньки × 10 листів = 20/день", size=FONT_CAPTION, color=TEXT_PRIMARY),
-                ft.Text("• Лист №1: Тільки Plain Text (без посилань)", size=FONT_CAPTION, color=TEXT_PRIMARY),
-                ft.Text("• Лист №2: Notion Blueprint + 10x ROI", size=FONT_CAPTION, color=TEXT_PRIMARY),
-                ft.Text("• Zero-Meeting: $2,000 аудит за 5 днів", size=FONT_CAPTION, color=TEXT_PRIMARY),
+                ft.Text("• 2 inboxes × 10 emails = 20/day", size=FONT_CAPTION, color=TEXT_PRIMARY),
+                ft.Text("• Letter 1: Plain text cold email (0 links)", size=FONT_CAPTION, color=TEXT_PRIMARY),
+                ft.Text("• Letter 2: Notion Architecture Blueprint + ROI", size=FONT_CAPTION, color=TEXT_PRIMARY),
+                ft.Text("• Async Delivery: 5-day automated staging", size=FONT_CAPTION, color=TEXT_PRIMARY),
             ], spacing=3)
         )
 
         self.content = ft.Column([
-            ft.Text("ШВИДКИЙ ПОШУК", size=FONT_CAPTION, weight=ft.FontWeight.BOLD, color=TEXT_MUTED),
+            ft.Text("QUICK SEARCH", size=FONT_CAPTION, weight=ft.FontWeight.BOLD, color=TEXT_MUTED),
             search_box,
             ft.Divider(height=12, color=BORDER_COLOR),
 
-            ft.Text("СКРИНЬКА ВІДПРАВКИ", size=FONT_CAPTION, weight=ft.FontWeight.BOLD, color=TEXT_MUTED),
+            ft.Text("OUTREACH INBOX", size=FONT_CAPTION, weight=ft.FontWeight.BOLD, color=TEXT_MUTED),
             ft.Row(inbox_chips, wrap=True, spacing=6),
             ft.Divider(height=12, color=BORDER_COLOR),
 
-            ft.Text("СТАТУС АУТРІЧУ", size=FONT_CAPTION, weight=ft.FontWeight.BOLD, color=TEXT_MUTED),
+            ft.Text("OUTREACH STATUS", size=FONT_CAPTION, weight=ft.FontWeight.BOLD, color=TEXT_MUTED),
             ft.Column(status_buttons, spacing=2),
             ft.Divider(height=12, color=BORDER_COLOR),
 
-            ft.Text("РЕГІОН", size=FONT_CAPTION, weight=ft.FontWeight.BOLD, color=TEXT_MUTED),
+            ft.Text("REGION", size=FONT_CAPTION, weight=ft.FontWeight.BOLD, color=TEXT_MUTED),
             ft.Row(country_chips, wrap=True, spacing=6),
             ft.Divider(height=12, color=BORDER_COLOR),
 

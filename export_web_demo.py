@@ -39,11 +39,11 @@ def get_leads_from_db(db_path: str) -> list:
     return leads
 
 HTML_TEMPLATE = """<!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Orion — B2B Lead Intelligence Dashboard (Live Interactive Demo)</title>
+  <title>B2B Lead Intelligence Dashboard — AI Agentic Showcase</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232563EB'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/></svg>">
   <style>
     :root {
@@ -616,22 +616,22 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       <div class="brand-logo">⚡</div>
       <div>
         <div class="brand-title">
-          Orion — B2B Lead Intelligence Dashboard
+          B2B Lead Intelligence Dashboard
           <span class="badge-live-demo">Live GitHub Pages Demo</span>
         </div>
-        <div class="brand-subtitle">AsyncFlow Systems • Production Lead Management (100% Zero-Cost Architecture)</div>
+        <div class="brand-subtitle">AI Agentic Intelligence • Production Lead Showcase (100% Zero-Cost Architecture)</div>
       </div>
     </div>
 
     <!-- METRICS -->
     <div class="metrics-row" id="metricsRow">
-      <div class="metric-badge metric-total">📁 Всього: <span id="mTotal">0</span></div>
-      <div class="metric-badge metric-inbox1">✉️ Пошта 1 (10/д): <span id="mInbox1">0</span></div>
-      <div class="metric-badge metric-inbox2">📬 Пошта 2 (10/д): <span id="mInbox2">0</span></div>
+      <div class="metric-badge metric-total">📁 Total: <span id="mTotal">0</span></div>
+      <div class="metric-badge metric-inbox1">✉️ Inbox 1 (10/d): <span id="mInbox1">0</span></div>
+      <div class="metric-badge metric-inbox2">📬 Inbox 2 (10/d): <span id="mInbox2">0</span></div>
       <div class="metric-badge metric-mxlive">🛡️ MX Live: <span id="mVerified">0</span></div>
-      <div class="metric-badge metric-notsent">⏳ Не відправлено: <span id="mNotSent">0</span></div>
-      <div class="metric-badge metric-sent">📤 Відправлено: <span id="mSent">0</span></div>
-      <div class="metric-badge metric-replied">💬 Отримано відповідь: <span id="mReplied">0</span></div>
+      <div class="metric-badge metric-notsent">⏳ Draft: <span id="mNotSent">0</span></div>
+      <div class="metric-badge metric-sent">📤 Sent: <span id="mSent">0</span></div>
+      <div class="metric-badge metric-replied">💬 Replied: <span id="mReplied">0</span></div>
     </div>
   </header>
 
@@ -640,36 +640,36 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     <!-- SIDEBAR -->
     <aside>
       <div>
-        <div class="sidebar-section-title">🔍 Пошук компанії</div>
-        <input type="text" id="searchInput" class="search-box" placeholder="Введіть назву, сайт, проблему...">
+        <div class="sidebar-section-title">🔍 Quick Search</div>
+        <input type="text" id="searchInput" class="search-box" placeholder="Search company, website, problem...">
       </div>
 
       <div>
-        <div class="sidebar-section-title">📊 Статус аутрічу</div>
+        <div class="sidebar-section-title">📊 Outreach Status</div>
         <div class="filter-btn-group" id="statusFilterGroup">
-          <button class="filter-btn active" data-status="Всі">Всі компанії <span class="filter-count" id="cAll">0</span></button>
-          <button class="filter-btn" data-status="Не відправлено">⏳ Не відправлено <span class="filter-count" id="cNotSent">0</span></button>
-          <button class="filter-btn" data-status="Відправлено">📤 Відправлено <span class="filter-count" id="cSent">0</span></button>
-          <button class="filter-btn" data-status="Отримано відповідь">💬 Отримано відповідь <span class="filter-count" id="cReplied">0</span></button>
+          <button class="filter-btn active" data-status="All">All Companies <span class="filter-count" id="cAll">0</span></button>
+          <button class="filter-btn" data-status="Draft">⏳ Draft <span class="filter-count" id="cNotSent">0</span></button>
+          <button class="filter-btn" data-status="Sent">📤 Sent <span class="filter-count" id="cSent">0</span></button>
+          <button class="filter-btn" data-status="Replied">💬 Replied <span class="filter-count" id="cReplied">0</span></button>
         </div>
       </div>
 
       <div>
-        <div class="sidebar-section-title">🌍 Географія (Ринок)</div>
+        <div class="sidebar-section-title">🌍 Geography (Market)</div>
         <div class="filter-btn-group" id="countryFilterGroup">
-          <button class="filter-btn active" data-country="Всі">Всі регіони</button>
-          <button class="filter-btn" data-country="ЄС">🇪🇺 Європейський Союз</button>
-          <button class="filter-btn" data-country="UK">🇬🇧 Велика Британія</button>
-          <button class="filter-btn" data-country="Україна">🇺🇦 Україна</button>
+          <button class="filter-btn active" data-country="All">All Regions</button>
+          <button class="filter-btn" data-country="EU">🇪🇺 European Union</button>
+          <button class="filter-btn" data-country="UK">🇬🇧 United Kingdom</button>
+          <button class="filter-btn" data-country="Ukraine">🇺🇦 Ukraine</button>
         </div>
       </div>
 
       <div>
-        <div class="sidebar-section-title">📬 Скринька відправки</div>
+        <div class="sidebar-section-title">📬 Outreach Inbox</div>
         <div class="filter-btn-group" id="inboxFilterGroup">
-          <button class="filter-btn active" data-inbox="Всі">Всі скриньки</button>
-          <button class="filter-btn" data-inbox="Пошта 1">Пошта 1 (UK / ЄС)</button>
-          <button class="filter-btn" data-inbox="Пошта 2">Пошта 2 (UA / ЄС)</button>
+          <button class="filter-btn active" data-inbox="All">All Inboxes</button>
+          <button class="filter-btn" data-inbox="Inbox 1">Inbox 1 (UK / EU)</button>
+          <button class="filter-btn" data-inbox="Inbox 2">Inbox 2 (UA / EU)</button>
         </div>
       </div>
 
@@ -691,30 +691,30 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   <div class="modal-overlay" id="emailModal">
     <div class="modal-dialog">
       <div class="modal-header">
-        <div class="modal-title" id="emailModalTitle">✉️ Лист №1: Plain Text</div>
+        <div class="modal-title" id="emailModalTitle">✉️ Letter 1: Plain Text</div>
         <button class="modal-close-btn" onclick="closeModal('emailModal')">&times;</button>
       </div>
       <div class="modal-body">
         <div class="content-box-email">
           <div style="display:flex; justify-content:space-between; align-items:center;">
-            <strong>✉️ Лист №1: Plain Text (День 1, без посилань, вхід через проблему Х):</strong>
-            <button class="btn-action btn-email-preview" onclick="copyEmailBody()">📋 Скопіювати Лист №1</button>
+            <strong>✉️ Letter 1: Plain Text (Day 1, 0 links, operational problem focus):</strong>
+            <button class="btn-action btn-email-preview" onclick="copyEmailBody()">📋 Copy Letter 1</button>
           </div>
           <div class="email-pre" id="emailModalText1"></div>
         </div>
 
         <div class="content-box-followup">
           <div style="display:flex; justify-content:space-between; align-items:center;">
-            <strong style="color:var(--color-indigo);">🔄 Лист №1.5: Follow-up (Staging Sandbox + $20k гарантія):</strong>
-            <button class="btn-action btn-blueprint-preview" onclick="copyFollowupBody()">📋 Скопіювати Follow-up</button>
+            <strong style="color:var(--color-indigo);">🔄 Letter 1.5: Follow-up (Staging Sandbox + $20k guarantee):</strong>
+            <button class="btn-action btn-blueprint-preview" onclick="copyFollowupBody()">📋 Copy Follow-up</button>
           </div>
           <div class="email-pre" id="emailModalText2"></div>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn-action btn-details" onclick="closeModal('emailModal')">Закрити</button>
+        <button class="btn-action btn-details" onclick="closeModal('emailModal')">Close</button>
         <button class="btn-action" style="background:var(--color-success); color:#fff;" onclick="markEmailSentFromModal()">
-          ✓ Скопіювати та позначити 'Відправлено'
+          ✓ Copy & Mark as 'Sent'
         </button>
       </div>
     </div>
@@ -731,8 +731,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         <div class="blueprint-markdown" id="blueprintModalContent"></div>
       </div>
       <div class="modal-footer">
-        <button class="btn-action btn-details" onclick="closeModal('blueprintModal')">Закрити</button>
-        <button class="btn-action btn-blueprint-preview" onclick="copyBlueprintBody()">📋 Скопіювати Notion Blueprint</button>
+        <button class="btn-action btn-details" onclick="closeModal('blueprintModal')">Close</button>
+        <button class="btn-action btn-blueprint-preview" onclick="copyBlueprintBody()">📋 Copy Notion Blueprint</button>
       </div>
     </div>
   </div>
@@ -741,19 +741,19 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   <div class="modal-overlay" id="detailsModal">
     <div class="modal-dialog">
       <div class="modal-header">
-        <div class="modal-title" id="detailsModalTitle">ℹ️ Повне досьє компанії</div>
+        <div class="modal-title" id="detailsModalTitle">ℹ️ Company Dossier</div>
         <button class="modal-close-btn" onclick="closeModal('detailsModal')">&times;</button>
       </div>
       <div class="modal-body" id="detailsModalContent">
       </div>
       <div class="modal-footer">
-        <button class="btn-action btn-details" onclick="closeModal('detailsModal')">Закрити</button>
+        <button class="btn-action btn-details" onclick="closeModal('detailsModal')">Close</button>
       </div>
     </div>
   </div>
 
   <!-- TOAST NOTIFICATION -->
-  <div id="toast">✅ Повідомлення скопійовано в буфер обміну!</div>
+  <div id="toast">✅ Notification copied to clipboard!</div>
 
   <script>
     // Embedded Data injected directly from SQLite
@@ -761,21 +761,21 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
     let currentFilter = {
       search: "",
-      status: "Всі",
-      country: "Всі",
-      inbox: "Всі"
+      status: "All",
+      country: "All",
+      inbox: "All"
     };
 
     let activeModalLead = null;
 
     function renderMetrics() {
       const total = LEADS_DATA.length;
-      const inbox1 = LEADS_DATA.filter(l => l.inbox_slot === "Пошта 1").length;
-      const inbox2 = LEADS_DATA.filter(l => l.inbox_slot === "Пошта 2").length;
+      const inbox1 = LEADS_DATA.filter(l => l.inbox_slot === "Inbox 1" || l.inbox_slot === "Пошта 1").length;
+      const inbox2 = LEADS_DATA.filter(l => l.inbox_slot === "Inbox 2" || l.inbox_slot === "Пошта 2").length;
       const verified = LEADS_DATA.filter(l => (l.mx_status || "").includes("Verified")).length;
-      const notSent = LEADS_DATA.filter(l => l.status === "Не відправлено").length;
-      const sent = LEADS_DATA.filter(l => l.status === "Відправлено").length;
-      const replied = LEADS_DATA.filter(l => l.status === "Отримано відповідь").length;
+      const notSent = LEADS_DATA.filter(l => l.status === "Draft" || l.status === "Не відправлено").length;
+      const sent = LEADS_DATA.filter(l => l.status === "Sent" || l.status === "Відправлено").length;
+      const replied = LEADS_DATA.filter(l => l.status === "Replied" || l.status === "Отримано відповідь" || l.status === "Відповіли").length;
 
       document.getElementById("mTotal").innerText = total;
       document.getElementById("mInbox1").innerText = inbox1;
@@ -792,19 +792,27 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     }
 
     function matchesFilter(lead) {
-      if (currentFilter.status !== "Всі" && lead.status !== currentFilter.status) return false;
-      if (currentFilter.inbox !== "Всі" && lead.inbox_slot !== currentFilter.inbox) return false;
+      if (currentFilter.status !== "All" && currentFilter.status !== "Всі") {
+        if (currentFilter.status === "Draft" && lead.status !== "Draft" && lead.status !== "Не відправлено") return false;
+        if (currentFilter.status === "Sent" && lead.status !== "Sent" && lead.status !== "Відправлено") return false;
+        if (currentFilter.status === "Replied" && lead.status !== "Replied" && lead.status !== "Отримано відповідь" && lead.status !== "Відповіли") return false;
+      }
 
-      if (currentFilter.country !== "Всі") {
+      if (currentFilter.inbox !== "All" && currentFilter.inbox !== "Всі") {
+        if (currentFilter.inbox === "Inbox 1" && lead.inbox_slot !== "Inbox 1" && lead.inbox_slot !== "Пошта 1") return false;
+        if (currentFilter.inbox === "Inbox 2" && lead.inbox_slot !== "Inbox 2" && lead.inbox_slot !== "Пошта 2") return false;
+      }
+
+      if (currentFilter.country !== "All" && currentFilter.country !== "Всі") {
         const c = (lead.country || "").toLowerCase();
-        if (currentFilter.country === "ЄС") {
-          const euList = ["germany", "німеччин", "france", "франц", "netherlands", "poland", "польщ", "ireland", "estonia", "sweden", "spain", "italy", "austria", "belgium", "єс", "eu"];
+        if (currentFilter.country === "EU" || currentFilter.country === "ЄС") {
+          const euList = ["germany", "germany (berlin)", "німеччин", "france", "netherlands", "poland", "ireland", "estonia", "sweden", "spain", "italy", "austria", "belgium", "eu", "єс"];
           if (!euList.some(k => c.includes(k))) return false;
         } else if (currentFilter.country === "UK") {
-          const ukList = ["uk", "united kingdom", "london", "великобритан", "лондон", "england"];
+          const ukList = ["uk", "united kingdom", "london", "england"];
           if (!ukList.some(k => c.includes(k))) return false;
-        } else if (currentFilter.country === "Україна") {
-          const uaList = ["ukraine", "україна", "kyiv", "київ", "lviv", "львів"];
+        } else if (currentFilter.country === "Ukraine" || currentFilter.country === "Україна") {
+          const uaList = ["ukraine", "україна", "kyiv", "lviv"];
           if (!uaList.some(k => c.includes(k))) return false;
         }
       }
@@ -828,8 +836,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         container.innerHTML = `
           <div style="text-align:center; padding: 60px 20px; background:var(--bg-surface); border:1px solid var(--border-color); border-radius:10px;">
             <div style="font-size:36px; margin-bottom:10px;">🔍</div>
-            <div style="font-size:16px; font-weight:700; color:var(--text-primary); margin-bottom:6px;">Не знайдено жодної компанії</div>
-            <div style="font-size:13px; color:var(--text-muted);">Спробуйте змінити критерії фільтрації у бічній панелі.</div>
+            <div style="font-size:16px; font-weight:700; color:var(--text-primary); margin-bottom:6px;">No companies found</div>
+            <div style="font-size:13px; color:var(--text-muted);">Try adjusting your filter criteria in the sidebar.</div>
           </div>
         `;
         return;
@@ -848,9 +856,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
             <div class="card-actions-right">
               ${lead.website ? `<a href="https://${escapeHtml(lead.website.replace(/^https?:\\/\\//, ''))}" target="_blank" class="btn-action btn-web">🌐 ${escapeHtml(lead.website)}</a>` : ''}
-              <button class="btn-action btn-email-preview" onclick="openEmailModal(${lead.id})">✉️ Лист №1 (Plain)</button>
-              <button class="btn-action btn-blueprint-preview" onclick="openBlueprintModal(${lead.id})">📄 Notion Блюпринт</button>
-              <button class="btn-action btn-details" onclick="openDetailsModal(${lead.id})" title="Повне досьє">ℹ️</button>
+              <button class="btn-action btn-email-preview" onclick="openEmailModal(${lead.id})">✉️ Letter 1 (Plain)</button>
+              <button class="btn-action btn-blueprint-preview" onclick="openBlueprintModal(${lead.id})">📄 Notion Blueprint</button>
+              <button class="btn-action btn-details" onclick="openDetailsModal(${lead.id})" title="Company Dossier">ℹ️</button>
             </div>
           </div>
 
@@ -858,19 +866,19 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
           <div class="card-body-grid">
             <div>
-              <div class="problem-box-title">⚡ Галузева проблема Х (Операційне вузьке місце):</div>
+              <div class="problem-box-title">⚡ Operational Bottleneck Hypothesis (Industry Problem X):</div>
               <div class="problem-box-text">${escapeHtml(lead.industry_problem_x)}</div>
             </div>
 
             <div class="contact-info-col">
-              <div class="info-row"><strong>👤 ЛПР:</strong> <span>${escapeHtml(lead.contact_role)}</span></div>
+              <div class="info-row"><strong>👤 Decision Maker:</strong> <span>${escapeHtml(lead.contact_role)}</span></div>
               <div class="info-row"><strong>✉️ Email:</strong> <span>${escapeHtml(lead.verified_email)}</span></div>
               <div class="info-row" style="margin-top:2px;">
-                <strong>📊 Статус:</strong>
+                <strong>📊 Status:</strong>
                 <select class="status-select" onchange="updateLeadStatus(${lead.id}, this.value)">
-                  <option value="Не відправлено" ${lead.status === "Не відправлено" ? "selected" : ""}>⏳ Не відправлено</option>
-                  <option value="Відправлено" ${lead.status === "Відправлено" ? "selected" : ""}>📤 Відправлено</option>
-                  <option value="Отримано відповідь" ${lead.status === "Отримано відповідь" ? "selected" : ""}>💬 Отримано відповідь</option>
+                  <option value="Draft" ${lead.status === "Draft" || lead.status === "Не відправлено" ? "selected" : ""}>⏳ Draft</option>
+                  <option value="Sent" ${lead.status === "Sent" || lead.status === "Відправлено" ? "selected" : ""}>📤 Sent</option>
+                  <option value="Replied" ${lead.status === "Replied" || lead.status === "Отримано відповідь" || lead.status === "Відповіли" ? "selected" : ""}>💬 Replied</option>
                 </select>
               </div>
             </div>
@@ -885,7 +893,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       if (lead) {
         lead.status = newStatus;
         renderMetrics();
-        showToast(`Статус ${lead.company} змінено на "${newStatus}"!`);
+        showToast(`Status for ${lead.company} updated to "${newStatus}"!`);
       }
     }
 
@@ -894,7 +902,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       if (!lead) return;
       activeModalLead = lead;
 
-      document.getElementById("emailModalTitle").innerText = `✉️ Лист №1: ${lead.company}`;
+      document.getElementById("emailModalTitle").innerText = `✉️ Letter 1: ${lead.company}`;
       document.getElementById("emailModalText1").innerText = lead.email_step1_plain_text || "";
       document.getElementById("emailModalText2").innerText = lead.email_step1_5_followup || "";
 
@@ -917,20 +925,20 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       if (!lead) return;
       activeModalLead = lead;
 
-      document.getElementById("detailsModalTitle").innerText = `ℹ️ Досьє: ${lead.company}`;
+      document.getElementById("detailsModalTitle").innerText = `ℹ️ Dossier: ${lead.company}`;
       document.getElementById("detailsModalContent").innerHTML = `
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-          <div><strong>Компанія:</strong> ${escapeHtml(lead.company)}</div>
-          <div><strong>Сайт:</strong> <a href="https://${escapeHtml(lead.website)}" target="_blank">${escapeHtml(lead.website)}</a></div>
-          <div><strong>Країна:</strong> ${escapeHtml(lead.country)}</div>
-          <div><strong>Скринька:</strong> ${escapeHtml(lead.inbox_slot)}</div>
-          <div><strong>ЛПР:</strong> ${escapeHtml(lead.contact_role)}</div>
+          <div><strong>Company:</strong> ${escapeHtml(lead.company)}</div>
+          <div><strong>Website:</strong> <a href="https://${escapeHtml(lead.website)}" target="_blank">${escapeHtml(lead.website)}</a></div>
+          <div><strong>Country:</strong> ${escapeHtml(lead.country)}</div>
+          <div><strong>Inbox:</strong> ${escapeHtml(lead.inbox_slot)}</div>
+          <div><strong>Decision Maker:</strong> ${escapeHtml(lead.contact_role)}</div>
           <div><strong>Email:</strong> ${escapeHtml(lead.verified_email)}</div>
-          <div><strong>MX Статус:</strong> ${escapeHtml(lead.mx_status)}</div>
-          <div><strong>Поточний статус:</strong> ${escapeHtml(lead.status)}</div>
+          <div><strong>MX Status:</strong> ${escapeHtml(lead.mx_status)}</div>
+          <div><strong>Status:</strong> ${escapeHtml(lead.status)}</div>
         </div>
         <div style="margin-top:10px;">
-          <strong>Операційне вузьке місце:</strong>
+          <strong>Operational Bottleneck Hypothesis:</strong>
           <p style="margin-top:4px; padding:10px; background:var(--bg-card); border-radius:6px; border:1px solid var(--border-color);">${escapeHtml(lead.industry_problem_x)}</p>
         </div>
       `;
@@ -943,26 +951,26 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
     function copyEmailBody() {
       if (activeModalLead) {
-        copyText(activeModalLead.email_step1_plain_text || "", "Лист №1 скопійовано в буфер!");
+        copyText(activeModalLead.email_step1_plain_text || "", "Letter 1 copied to clipboard!");
       }
     }
 
     function copyFollowupBody() {
       if (activeModalLead) {
-        copyText(activeModalLead.email_step1_5_followup || "", "Follow-up скопійовано в буфер!");
+        copyText(activeModalLead.email_step1_5_followup || "", "Follow-up copied to clipboard!");
       }
     }
 
     function copyBlueprintBody() {
       if (activeModalLead) {
-        copyText(activeModalLead.notion_adaptation_blueprint || "", "Notion Blueprint скопійовано в буфер!");
+        copyText(activeModalLead.notion_adaptation_blueprint || "", "Notion Blueprint copied to clipboard!");
       }
     }
 
     function markEmailSentFromModal() {
       if (activeModalLead) {
-        copyText(activeModalLead.email_step1_plain_text || "", "Лист скопійовано та статус змінено на 'Відправлено'!");
-        updateLeadStatus(activeModalLead.id, "Відправлено");
+        copyText(activeModalLead.email_step1_plain_text || "", "Email copied and status updated to 'Sent'!");
+        updateLeadStatus(activeModalLead.id, "Sent");
         renderLeads();
         closeModal("emailModal");
       }

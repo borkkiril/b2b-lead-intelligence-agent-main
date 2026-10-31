@@ -4,7 +4,7 @@ Database Management Module (SQLite) for B2B Lead Intelligence Dashboard.
 
 Fields:
 - id: INTEGER PRIMARY KEY AUTOINCREMENT
-- inbox_slot: TEXT ('Пошта 1' / 'Пошта 2')
+- inbox_slot: TEXT ('Inbox 1' / 'Inbox 2')
 - company: TEXT NOT NULL
 - country: TEXT NOT NULL
 - website: TEXT NOT NULL
@@ -15,7 +15,7 @@ Fields:
 - email_step1_plain_text: TEXT NOT NULL
 - email_step1_5_followup: TEXT NOT NULL DEFAULT ''
 - notion_adaptation_blueprint: TEXT NOT NULL
-- status: TEXT NOT NULL DEFAULT 'Не відправлено'
+- status: TEXT NOT NULL DEFAULT 'Draft'
 - created_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 """
 
@@ -47,7 +47,7 @@ def get_connection(db_path: Optional[str] = None):
         conn.close()
 
 def init_db(db_path: Optional[str] = None) -> None:
-    """Створює таблицю leads з усіма обов'язковими полями та перевіряє цілісність."""
+    """Creates leads table with all required schema fields and verifies integrity."""
     path = get_db_path(db_path)
     os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
     with get_connection(db_path) as conn:
@@ -55,7 +55,7 @@ def init_db(db_path: Optional[str] = None) -> None:
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS leads (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                inbox_slot TEXT NOT NULL DEFAULT 'Пошта 1',
+                inbox_slot TEXT NOT NULL DEFAULT 'Inbox 1',
                 company TEXT NOT NULL,
                 country TEXT NOT NULL,
                 website TEXT NOT NULL,
@@ -66,24 +66,24 @@ def init_db(db_path: Optional[str] = None) -> None:
                 email_step1_plain_text TEXT NOT NULL,
                 email_step1_5_followup TEXT NOT NULL DEFAULT '',
                 notion_adaptation_blueprint TEXT NOT NULL,
-                status TEXT NOT NULL DEFAULT 'Не відправлено',
+                status TEXT NOT NULL DEFAULT 'Draft',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         """)
-        # Міграція колонки email_step1_5_followup якщо база вже існувала
+        # Migration for email_step1_5_followup column if legacy table existed
         cursor.execute("PRAGMA table_info(leads);")
         cols = {row["name"] for row in cursor.fetchall()}
         if "email_step1_5_followup" not in cols:
             cursor.execute("ALTER TABLE leads ADD COLUMN email_step1_5_followup TEXT NOT NULL DEFAULT '';")
 
-        # Створюємо індекси для швидкої фільтрації
+        # Create indices for high-performance filtering
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_leads_status ON leads (status);")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_leads_inbox ON leads (inbox_slot);")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_leads_country ON leads (country);")
         conn.commit()
 
 def verify_table_integrity(db_path: Optional[str] = None) -> bool:
-    """Перевіряє наявність усіх обов'язкових колонок у таблиці leads."""
+    """Verifies existence of all mandatory columns in leads table."""
     expected_columns = {
         "id", "inbox_slot", "company", "country", "website",
         "industry_problem_x", "contact_role", "verified_email",
@@ -102,9 +102,9 @@ class LeadRecord(BaseModel):
     Pydantic v2 schema for validating B2B lead records before database persistence.
     Guarantees strict typing and default values for all 11 required system fields.
     """
-    inbox_slot: str = Field(default="Пошта 1", description="Account inbox slot (e.g. Пошта 1 / Пошта 2)")
+    inbox_slot: str = Field(default="Inbox 1", description="Account inbox slot (e.g. Inbox 1 / Inbox 2)")
     company: str = Field(default="Unknown", min_length=1, description="Company name")
-    country: str = Field(default="ЄС", description="Headquarters region or country")
+    country: str = Field(default="EU", description="Headquarters region or country")
     website: str = Field(default="", description="Primary corporate domain / URL")
     industry_problem_x: str = Field(default="", description="Operational pain trigger or industry bottleneck hypothesis")
     contact_role: str = Field(default="", description="Decision-maker full name and job title")
@@ -113,19 +113,39 @@ class LeadRecord(BaseModel):
     email_step1_plain_text: str = Field(default="", description="Plain-text Step 1 email payload")
     email_step1_5_followup: str = Field(default="", description="Step 1.5 followup email payload")
     notion_adaptation_blueprint: str = Field(default="", description="Technical Notion architecture blueprint")
-    status: str = Field(default="Не відправлено", description="Outreach processing status")
+    status: str = Field(default="Draft", description="Outreach processing status (Draft / Sent / Replied)")
 
 def insert_lead(lead: Union[Dict[str, Any], LeadRecord], db_path: Optional[str] = None) -> int:
-    """Додає новий запис ліда в БД з обов'язковою Pydantic v2 валідацією. Повертає згенерований ID."""
+    """Adds a new lead record to SQLite with strict Pydantic v2 validation. Returns generated ID."""
     init_db(db_path)
     if isinstance(lead, LeadRecord):
         record = lead
     else:
         # Normalize fields supporting legacy agent dictionaries
+        raw_inbox = lead.get("inbox_slot") or "Inbox 1"
+        if raw_inbox in ("Пошта 1", "Акаунт 1"):
+            raw_inbox = "Inbox 1"
+        elif raw_inbox in ("Пошта 2", "Акаунт 2"):
+            raw_inbox = "Inbox 2"
+
+        raw_status = lead.get("status") or lead.get("outreach_status") or "Draft"
+        if raw_status in ("Не відправлено", "draft"):
+            raw_status = "Draft"
+        elif raw_status in ("Відправлено", "sent"):
+            raw_status = "Sent"
+        elif raw_status in ("Отримано відповідь", "Відповіли", "replied"):
+            raw_status = "Replied"
+
+        raw_country = lead.get("country") or lead.get("headquarters") or "EU"
+        if raw_country == "ЄС":
+            raw_country = "EU"
+        elif raw_country == "Україна":
+            raw_country = "Ukraine"
+
         raw = {
-            "inbox_slot": lead.get("inbox_slot") or "Пошта 1",
+            "inbox_slot": raw_inbox,
             "company": lead.get("company") or lead.get("name") or "Unknown",
-            "country": lead.get("country") or lead.get("headquarters") or "ЄС",
+            "country": raw_country,
             "website": lead.get("website") or lead.get("domain") or "",
             "industry_problem_x": (
                 lead.get("industry_problem_x")
@@ -153,7 +173,7 @@ def insert_lead(lead: Union[Dict[str, Any], LeadRecord], db_path: Optional[str] 
             "email_step1_plain_text": lead.get("email_step1_plain_text") or lead.get("cold_email") or "",
             "email_step1_5_followup": lead.get("email_step1_5_followup") or "",
             "notion_adaptation_blueprint": lead.get("notion_adaptation_blueprint") or "",
-            "status": lead.get("status") or lead.get("outreach_status") or "Не відправлено",
+            "status": raw_status,
         }
         record = LeadRecord(**raw)
 
@@ -185,25 +205,37 @@ def get_leads(
     search: Optional[str] = None,
     db_path: Optional[str] = None
 ) -> List[Dict[str, Any]]:
-    """Повертає список лідів з можливістю фільтрації."""
+    """Returns list of leads with multi-parameter filtering."""
     init_db(db_path)
     conditions = []
     params = []
 
-    if status and status != "Всі":
-        conditions.append("status = ?")
-        params.append(status)
+    if status and status not in ("All", "Всі"):
+        if status in ("Draft", "Не відправлено"):
+            conditions.append("status IN ('Draft', 'Не відправлено')")
+        elif status in ("Sent", "Відправлено"):
+            conditions.append("status IN ('Sent', 'Відправлено')")
+        elif status in ("Replied", "Отримано відповідь", "Відповіли"):
+            conditions.append("status IN ('Replied', 'Отримано відповідь', 'Відповіли')")
+        else:
+            conditions.append("status = ?")
+            params.append(status)
 
-    if inbox_slot and inbox_slot != "Всі":
-        conditions.append("inbox_slot = ?")
-        params.append(inbox_slot)
+    if inbox_slot and inbox_slot not in ("All", "Всі"):
+        if inbox_slot in ("Inbox 1", "Пошта 1", "Акаунт 1"):
+            conditions.append("inbox_slot IN ('Inbox 1', 'Пошта 1')")
+        elif inbox_slot in ("Inbox 2", "Пошта 2", "Акаунт 2"):
+            conditions.append("inbox_slot IN ('Inbox 2', 'Пошта 2')")
+        else:
+            conditions.append("inbox_slot = ?")
+            params.append(inbox_slot)
 
-    if country and country != "Всі":
-        if country == "ЄС":
+    if country and country not in ("All", "Всі"):
+        if country in ("EU", "ЄС"):
             conditions.append("(country LIKE '%germany%' OR country LIKE '%німеччин%' OR country LIKE '%france%' OR country LIKE '%франц%' OR country LIKE '%netherlands%' OR country LIKE '%poland%' OR country LIKE '%польщ%' OR country LIKE '%ireland%' OR country LIKE '%estonia%' OR country LIKE '%sweden%' OR country LIKE '%spain%' OR country LIKE '%italy%' OR country LIKE '%austria%' OR country LIKE '%belgium%' OR country LIKE '%czech%' OR country LIKE '%чехі%' OR country LIKE '%switzerland%' OR country LIKE '%швейцар%' OR country LIKE '%єс%' OR country LIKE '%eu%')")
-        elif country == "UK":
+        elif country in ("UK",):
             conditions.append("(country LIKE '%uk%' OR country LIKE '%united kingdom%' OR country LIKE '%london%' OR country LIKE '%великобритан%' OR country LIKE '%лондон%' OR country LIKE '%england%')")
-        elif country == "Україна":
+        elif country in ("Ukraine", "Україна"):
             conditions.append("(country LIKE '%ukraine%' OR country LIKE '%україна%' OR country LIKE '%kyiv%' OR country LIKE '%київ%' OR country LIKE '%lviv%' OR country LIKE '%львів%')")
         else:
             conditions.append("country LIKE ?")
@@ -230,7 +262,7 @@ def get_leads(
         return [dict(row) for row in rows]
 
 def get_lead_by_id(lead_id: int, db_path: Optional[str] = None) -> Optional[Dict[str, Any]]:
-    """Повертає один лід за його ID."""
+    """Returns a single lead record by its primary ID."""
     init_db(db_path)
     with get_connection(db_path) as conn:
         cursor = conn.cursor()
@@ -239,7 +271,7 @@ def get_lead_by_id(lead_id: int, db_path: Optional[str] = None) -> Optional[Dict
         return dict(row) if row else None
 
 def update_lead_status(lead_id: int, status: str, db_path: Optional[str] = None) -> bool:
-    """Оновлює статус ліда (Не відправлено / Відправлено / Отримано відповідь)."""
+    """Updates lead outreach status (Draft / Sent / Replied)."""
     init_db(db_path)
     with get_connection(db_path) as conn:
         cursor = conn.cursor()
@@ -248,7 +280,7 @@ def update_lead_status(lead_id: int, status: str, db_path: Optional[str] = None)
         return cursor.rowcount > 0
 
 def update_lead(lead_id: int, fields: Dict[str, Any], db_path: Optional[str] = None) -> bool:
-    """Оновлює довільні поля ліда."""
+    """Updates arbitrary fields for a lead record."""
     init_db(db_path)
     allowed_fields = {
         "inbox_slot", "company", "country", "website",
@@ -271,9 +303,9 @@ def update_lead(lead_id: int, fields: Dict[str, Any], db_path: Optional[str] = N
 
 def update_unsent_lead(lead_id: int, fields: Dict[str, Any], db_path: Optional[str] = None) -> bool:
     """
-    Безпечно оновлює поля чернетки ліда.
-    Оновлення дозволено ВИКЛЮЧНО для невідправлених листів (status IN ('Не відправлено', 'DRAFT')).
-    Запобігає перезапису вже відправлених комунікацій або лідів із відповідями (ACID State Immutability).
+    Safely updates fields on an unsent draft lead.
+    Updates are permitted EXCLUSIVELY for unsent drafts (status IN ('Draft', 'DRAFT', 'Не відправлено')).
+    Prevents overwriting sent communications or replied leads (ACID State Immutability).
     """
     init_db(db_path)
     allowed_fields = {
@@ -292,14 +324,14 @@ def update_unsent_lead(lead_id: int, fields: Dict[str, Any], db_path: Optional[s
     with get_connection(db_path) as conn:
         cursor = conn.cursor()
         cursor.execute(
-            f"UPDATE leads SET {set_clause} WHERE id = ? AND status IN ('Не відправлено', 'DRAFT');",
+            f"UPDATE leads SET {set_clause} WHERE id = ? AND status IN ('Draft', 'DRAFT', 'Не відправлено');",
             params
         )
         conn.commit()
         return cursor.rowcount > 0
 
 def delete_lead(lead_id: int, db_path: Optional[str] = None) -> bool:
-    """Видаляє лід за ID."""
+    """Deletes a lead by ID."""
     init_db(db_path)
     with get_connection(db_path) as conn:
         cursor = conn.cursor()
@@ -308,26 +340,26 @@ def delete_lead(lead_id: int, db_path: Optional[str] = None) -> bool:
         return cursor.rowcount > 0
 
 def count_metrics(db_path: Optional[str] = None) -> Dict[str, int]:
-    """Повертає агреговані лічильники бази."""
+    """Returns aggregated database telemetry counters."""
     init_db(db_path)
     with get_connection(db_path) as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT COUNT(*) FROM leads;")
         total = cursor.fetchone()[0]
 
-        cursor.execute("SELECT COUNT(*) FROM leads WHERE status = 'Не відправлено';")
+        cursor.execute("SELECT COUNT(*) FROM leads WHERE status IN ('Draft', 'Не відправлено');")
         not_sent = cursor.fetchone()[0]
 
-        cursor.execute("SELECT COUNT(*) FROM leads WHERE status = 'Відправлено';")
+        cursor.execute("SELECT COUNT(*) FROM leads WHERE status IN ('Sent', 'Відправлено');")
         sent = cursor.fetchone()[0]
 
-        cursor.execute("SELECT COUNT(*) FROM leads WHERE status = 'Отримано відповідь';")
+        cursor.execute("SELECT COUNT(*) FROM leads WHERE status IN ('Replied', 'Отримано відповідь', 'Відповіли');")
         replied = cursor.fetchone()[0]
 
-        cursor.execute("SELECT COUNT(*) FROM leads WHERE inbox_slot = 'Пошта 1';")
+        cursor.execute("SELECT COUNT(*) FROM leads WHERE inbox_slot IN ('Inbox 1', 'Пошта 1');")
         inbox_1 = cursor.fetchone()[0]
 
-        cursor.execute("SELECT COUNT(*) FROM leads WHERE inbox_slot = 'Пошта 2';")
+        cursor.execute("SELECT COUNT(*) FROM leads WHERE inbox_slot IN ('Inbox 2', 'Пошта 2');")
         inbox_2 = cursor.fetchone()[0]
 
         cursor.execute("SELECT COUNT(*) FROM leads WHERE mx_status LIKE '%Verified%';")
@@ -344,7 +376,7 @@ def count_metrics(db_path: Optional[str] = None) -> Dict[str, int]:
         }
 
 def sync_from_json(json_path: Optional[str] = None, db_path: Optional[str] = None) -> int:
-    """Імпортує акаунти з knowledge_base.json у SQLite leads.db, якщо база порожня."""
+    """Imports accounts from knowledge_base.json into SQLite leads.db if table is empty."""
     path = json_path or KB_JSON_FILE
     if not os.path.exists(path):
         return 0
@@ -354,7 +386,7 @@ def sync_from_json(json_path: Optional[str] = None, db_path: Optional[str] = Non
         cursor = conn.cursor()
         cursor.execute("SELECT COUNT(*) FROM leads;")
         if cursor.fetchone()[0] > 0:
-            return 0  # вже заповнено
+            return 0
 
     try:
         with open(path, "r", encoding="utf-8") as f:
@@ -362,11 +394,30 @@ def sync_from_json(json_path: Optional[str] = None, db_path: Optional[str] = Non
         accounts = data.get("accounts", [])
         inserted = 0
         for i, acc in enumerate(accounts):
-            slot = acc.get("inbox_slot") or ("Пошта 1" if i % 2 == 0 else "Пошта 2")
+            raw_slot = acc.get("inbox_slot") or ("Inbox 1" if i % 2 == 0 else "Inbox 2")
+            if raw_slot in ("Пошта 1", "Акаунт 1"):
+                raw_slot = "Inbox 1"
+            elif raw_slot in ("Пошта 2", "Акаунт 2"):
+                raw_slot = "Inbox 2"
+
+            raw_status = acc.get("status") or acc.get("outreach_status", "Draft")
+            if raw_status in ("Не відправлено", "draft"):
+                raw_status = "Draft"
+            elif raw_status in ("Відправлено", "sent"):
+                raw_status = "Sent"
+            elif raw_status in ("Отримано відповідь", "Відповіли", "replied"):
+                raw_status = "Replied"
+
+            raw_country = acc.get("country") or acc.get("headquarters", "EU")
+            if raw_country == "ЄС":
+                raw_country = "EU"
+            elif raw_country == "Україна":
+                raw_country = "Ukraine"
+
             lead_dict = {
-                "inbox_slot": slot,
+                "inbox_slot": raw_slot,
                 "company": acc.get("company") or acc.get("name", "Unknown"),
-                "country": acc.get("country") or acc.get("headquarters", "ЄС"),
+                "country": raw_country,
                 "website": acc.get("website") or acc.get("domain", ""),
                 "industry_problem_x": acc.get("industry_problem_x") or acc.get("operational_pain_trigger") or acc.get("process_bottleneck_hypothesis", ""),
                 "contact_role": acc.get("contact_role") or f"{acc.get('decision_maker', {}).get('full_name', '')} ({acc.get('decision_maker', {}).get('title', '')})".strip(),
@@ -375,7 +426,7 @@ def sync_from_json(json_path: Optional[str] = None, db_path: Optional[str] = Non
                 "email_step1_plain_text": acc.get("email_step1_plain_text") or acc.get("cold_email", ""),
                 "email_step1_5_followup": acc.get("email_step1_5_followup", ""),
                 "notion_adaptation_blueprint": acc.get("notion_adaptation_blueprint") or "",
-                "status": acc.get("status") or acc.get("outreach_status", "Не відправлено"),
+                "status": raw_status,
             }
             insert_lead(lead_dict, db_path)
             inserted += 1
@@ -385,7 +436,7 @@ def sync_from_json(json_path: Optional[str] = None, db_path: Optional[str] = Non
         return 0
 
 def export_to_json(json_path: Optional[str] = None, db_path: Optional[str] = None) -> bool:
-    """Експортує всі записи з SQLite leads.db назад у knowledge_base.json для синхронізації."""
+    """Exports all records from SQLite leads.db back to knowledge_base.json for synchronization."""
     path = json_path or KB_JSON_FILE
     leads = get_leads(db_path=db_path)
     metrics = count_metrics(db_path=db_path)

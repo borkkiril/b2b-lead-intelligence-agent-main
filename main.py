@@ -1,8 +1,8 @@
 """
-AI Prospecting Agent (Orion) — B2B Lead Intelligence Dashboard
-Чистий візуальний інтерфейс бази даних лідів (ЄС, UK, Україна).
-Працює 100% автономно з локальною SQLite базою даних (data/leads.db) та knowledge_base.json без платних зовнішніх API.
-Підтримує 11 обов'язкових полів:
+B2B Lead Intelligence Dashboard (Showcase Application)
+Visual management dashboard for qualified B2B leads across EU, UK, and Ukraine.
+Operates 100% offline with local SQLite database (data/leads.db) without paid external APIs.
+Supports all 11 required system fields:
 inbox_slot, company, country, website, industry_problem_x, contact_role,
 verified_email, mx_status, email_step1_plain_text, notion_adaptation_blueprint, status.
 """
@@ -57,7 +57,7 @@ def _safe_export_to_json():
         export_to_json()
 
 def main(page: ft.Page):
-    page.title = "B2B Lead Intelligence Dashboard — AsyncFlow Systems"
+    page.title = "B2B Lead Intelligence Dashboard — AI Agentic Showcase"
     if hasattr(page, "window") and page.window:
         page.window.width = 1440
         page.window.height = 920
@@ -67,16 +67,16 @@ def main(page: ft.Page):
     page.bgcolor = BG_PAGE
     page.padding = 0
 
-    # 1. Завантаження даних з SQLite (зі синхронізацією з knowledge_base.json)
+    # 1. Ingestion from SQLite
     init_db()
     sync_from_json()
     accounts = get_leads()
 
-    # Поточні значення фільтрів
+    # Active filter states
     current_search = ""
-    current_status = "Всі"
-    current_country = "Всі"
-    current_inbox = "Всі"
+    current_status = "All"
+    current_country = "All"
+    current_inbox = "All"
 
     def handle_update_status(account: dict, outreach_status: str):
         lead_id = account.get("id")
@@ -85,7 +85,7 @@ def main(page: ft.Page):
         account["status"] = outreach_status
         account["outreach_status"] = outreach_status
         
-        # Асинхронний експорт у JSON із блокуванням потоку
+        # Asynchronous export to JSON with mutex lock
         threading.Thread(target=_safe_export_to_json, daemon=True).start()
         
         header.update_metrics(get_leads())
@@ -102,7 +102,7 @@ def main(page: ft.Page):
         render_table()
         try:
             page.show_dialog(ft.SnackBar(
-                content=ft.Text(f"Базу оновлено! Завантажено {len(accounts)} компаній.", color=ft.Colors.WHITE),
+                content=ft.Text(f"Database refreshed! Loaded {len(accounts)} companies.", color=ft.Colors.WHITE),
                 bgcolor=COLOR_PRIMARY,
                 duration=2000
             ))
@@ -122,7 +122,7 @@ def main(page: ft.Page):
         except Exception:
             pass
 
-    # 2. Фільтрація списку лідів через оптимізовані індекси SQLite
+    # 2. Filter query execution through SQLite indexes
     def get_filtered_accounts():
         return get_leads(
             status=current_status,
@@ -131,7 +131,7 @@ def main(page: ft.Page):
             search=current_search
         )
 
-    # 3. Контейнер таблиці
+    # 3. Table UI Container
     table_container = ft.Column(expand=True, scroll=ft.ScrollMode.AUTO, spacing=12)
 
     def render_table():
@@ -145,9 +145,9 @@ def main(page: ft.Page):
                     padding=ft.Padding.all(50),
                     content=ft.Column([
                         ft.Icon(ft.Icons.SEARCH_OFF_ROUNDED, size=50, color=TEXT_MUTED),
-                        ft.Text("Не знайдено жодної компанії за обраними фільтрами", size=FONT_DIALOG_TITLE, weight=ft.FontWeight.W_600, color=TEXT_SECONDARY),
+                        ft.Text("No companies found for the selected filters", size=FONT_DIALOG_TITLE, weight=ft.FontWeight.W_600, color=TEXT_SECONDARY),
                         ft.Text(
-                            "Спробуйте змінити фільтри або додайте нові контакти через скіл instant-closer.",
+                            "Try adjusting filter criteria in the sidebar or discover new leads with the lead-enricher skill.",
                             size=FONT_BODY,
                             color=TEXT_MUTED,
                             text_align=ft.TextAlign.CENTER
@@ -161,15 +161,15 @@ def main(page: ft.Page):
             table_container.controls.append(create_lead_card(acc, i))
 
     def create_lead_card(acc: dict, index: int):
-        company = acc.get("company") or acc.get("name", "Компанія")
+        company = acc.get("company") or acc.get("name", "Company")
         website = acc.get("website") or acc.get("domain", "")
-        country = acc.get("country") or acc.get("headquarters", "ЄС")
-        inbox_slot = acc.get("inbox_slot", "Пошта 1")
+        country = acc.get("country") or acc.get("headquarters", "EU")
+        inbox_slot = acc.get("inbox_slot", "Inbox 1")
         problem = acc.get("industry_problem_x") or acc.get("operational_pain_trigger", "—")
         contact_role = acc.get("contact_role") or "Decision Maker"
-        email = acc.get("verified_email") or acc.get("decision_maker", {}).get("primary_email", "—")
+        email = acc.get("verified_email") or account_email(acc)
         mx_status = acc.get("mx_status") or "Verified MX Live"
-        status = acc.get("status") or acc.get("outreach_status") or "Не відправлено"
+        status = acc.get("status") or acc.get("outreach_status") or "Draft"
 
         # Verification badge
         verif_badge = ft.Container(
@@ -207,12 +207,12 @@ def main(page: ft.Page):
         status_select = ft.Dropdown(
             value=status,
             options=[
-                ft.dropdown.Option("Не відправлено"),
-                ft.dropdown.Option("Відправлено"),
-                ft.dropdown.Option("Отримано відповідь"),
+                ft.dropdown.Option("Draft"),
+                ft.dropdown.Option("Sent"),
+                ft.dropdown.Option("Replied"),
             ],
             dense=True,
-            width=180,
+            width=160,
             text_size=FONT_CAPTION,
             on_select=on_status_change
         )
@@ -236,20 +236,20 @@ def main(page: ft.Page):
                         on_click=lambda e: launch_system_browser(f"https://{website}" if not website.startswith("http") else website)
                     ) if website else ft.Container(),
                     ft.FilledButton(
-                        "✉️ Лист №1 (Plain)",
+                        "✉️ Letter 1 (Plain)",
                         icon=ft.Icons.EMAIL_ROUNDED,
                         style=ft.ButtonStyle(bgcolor=COLOR_PRIMARY_LIGHT, color=COLOR_PRIMARY),
                         on_click=lambda e: create_email_preview_dialog(page, acc, handle_update_status)
                     ),
                     ft.FilledButton(
-                        "📄 Notion Блюпринт",
+                        "📄 Notion Blueprint",
                         icon=ft.Icons.DESCRIPTION_ROUNDED,
                         style=ft.ButtonStyle(bgcolor=COLOR_INDIGO_LIGHT, color=COLOR_INDIGO),
                         on_click=lambda e: create_blueprint_preview_dialog(page, acc)
                     ),
                     ft.IconButton(
                         icon=ft.Icons.INFO_OUTLINE_ROUNDED,
-                        tooltip="Повне досьє",
+                        tooltip="Company Dossier",
                         icon_color=COLOR_PRIMARY,
                         icon_size=20,
                         on_click=lambda e: create_account_details_dialog(page, acc, handle_update_status)
@@ -266,7 +266,7 @@ def main(page: ft.Page):
                         content=ft.Column([
                             ft.Row([
                                 ft.Icon(ft.Icons.BOLT_ROUNDED, size=15, color=COLOR_WARNING),
-                                ft.Text("Галузева проблема Х (Операційне вузьке місце):", size=FONT_CAPTION, weight=ft.FontWeight.BOLD, color=TEXT_MUTED)
+                                ft.Text("Operational Bottleneck Hypothesis (Industry Problem X):", size=FONT_CAPTION, weight=ft.FontWeight.BOLD, color=TEXT_MUTED)
                             ], spacing=4),
                             ft.Text(problem, size=FONT_BODY, color=TEXT_PRIMARY, max_lines=3, overflow=ft.TextOverflow.ELLIPSIS)
                         ], spacing=2)
@@ -280,7 +280,7 @@ def main(page: ft.Page):
                         content=ft.Column([
                             ft.Row([
                                 ft.Icon(ft.Icons.PERSON_OUTLINE_ROUNDED, size=15, color=COLOR_INDIGO),
-                                ft.Text("ОПР та Роль:", size=FONT_CAPTION, weight=ft.FontWeight.BOLD, color=TEXT_MUTED),
+                                ft.Text("Decision Maker & Role:", size=FONT_CAPTION, weight=ft.FontWeight.BOLD, color=TEXT_MUTED),
                             ], spacing=4),
                             ft.Text(contact_role, size=FONT_BODY, weight=ft.FontWeight.W_600, color=TEXT_PRIMARY, max_lines=2, overflow=ft.TextOverflow.ELLIPSIS),
                         ], spacing=2)
@@ -294,13 +294,13 @@ def main(page: ft.Page):
                         content=ft.Column([
                             ft.Row([
                                 ft.Icon(ft.Icons.ALTERNATE_EMAIL_ROUNDED, size=15, color=COLOR_PRIMARY),
-                                ft.Text("Робочий Email:", size=FONT_CAPTION, weight=ft.FontWeight.BOLD, color=TEXT_MUTED),
+                                ft.Text("Business Email:", size=FONT_CAPTION, weight=ft.FontWeight.BOLD, color=TEXT_MUTED),
                                 ft.IconButton(
                                     icon=ft.Icons.CONTENT_COPY_ROUNDED,
-                                    tooltip="Скопіювати email",
+                                    tooltip="Copy email",
                                     icon_size=15,
                                     icon_color=COLOR_PRIMARY,
-                                    on_click=lambda e: copy_to_clipboard(page, email, "Email скопійовано!")
+                                    on_click=lambda e: copy_to_clipboard(page, email, "Email copied to clipboard!")
                                 ) if email and email != "—" else ft.Container()
                             ], spacing=4),
                             ft.Text(email, size=FONT_BODY, weight=ft.FontWeight.W_500, color=COLOR_PRIMARY if email != "—" else TEXT_MUTED)
@@ -313,7 +313,7 @@ def main(page: ft.Page):
                     ft.Container(
                         expand=2,
                         content=ft.Column([
-                            ft.Text("Статус аутрічу:", size=FONT_CAPTION, weight=ft.FontWeight.BOLD, color=TEXT_MUTED),
+                            ft.Text("Outreach Status:", size=FONT_CAPTION, weight=ft.FontWeight.BOLD, color=TEXT_MUTED),
                             status_select
                         ], spacing=3)
                     )
@@ -322,7 +322,7 @@ def main(page: ft.Page):
         )
         return card
 
-    # 4. Монтування дашборду
+    # 4. Mount dashboard
     header = DashboardHeader(accounts=accounts, on_refresh=handle_refresh)
     sidebar = DashboardSidebar(on_filter_change=handle_filter_change)
 
@@ -343,19 +343,25 @@ def main(page: ft.Page):
 
     page.add(main_layout)
 
+def account_email(acc: dict) -> str:
+    dm = acc.get("decision_maker")
+    if isinstance(dm, dict):
+        return dm.get("primary_email", "—")
+    return "—"
+
 if __name__ == "__main__":
     if "--web" in sys.argv or "-w" in sys.argv:
-        print("🌐 Запуск веб-інтерфейсу B2B Lead Dashboard на http://localhost:8550...")
+        print("🌐 Starting B2B Lead Dashboard web interface on http://localhost:8550...")
         try:
             ft.run(main, host="0.0.0.0", port=8550, view=ft.AppView.WEB_BROWSER)
         except Exception as e:
-            print(f"Попередження відкриття браузера: {e}. Запуск у режимі сервера...")
+            print(f"Browser launch note: {e}. Running in headless server mode...")
             ft.run(main, host="0.0.0.0", port=8550, view=None)
     else:
         try:
             ft.run(main)
         except Exception as e:
-            print(f"Десктопний запуск: {e}. Перехід на веб-інтерфейс (http://localhost:8550)...")
+            print(f"Desktop launch note: {e}. Falling back to web interface (http://localhost:8550)...")
             try:
                 ft.run(main, host="0.0.0.0", port=8550, view=ft.AppView.WEB_BROWSER)
             except Exception:

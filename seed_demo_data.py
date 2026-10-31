@@ -21,11 +21,11 @@ from core.database import init_db, insert_lead, get_leads, count_metrics, get_co
 
 DEMO_COMPANIES = [
     {
-        "inbox_slot": "Пошта 1",
+        "inbox_slot": "Inbox 1",
         "company": "Apex Settlement Labs Ltd",
         "country": "🇬🇧 UK (London)",
         "website": "apex-settlement.example.com",
-        "industry_problem_x": "Розсинхрон черги асинхронних вебхуків Open Banking та розбіжності у клірингових реєстрах BACS проти балансів мерчантів під час пікових навантажень.",
+        "industry_problem_x": "Asynchronous Open Banking webhook queue desynchronization and discrepancies between BACS clearing registers vs merchant balances during peak traffic spikes.",
         "contact_role": "Oliver Vance (Co-Founder & CEO)",
         "verified_email": "oliver.vance@apex-settlement.example.com",
         "mx_status": "Verified MX (Google Workspace) + HTTP 200 Live",
@@ -100,14 +100,14 @@ If this audit does not identify at least $20,000 in provable annual labor and er
 ### 6. Dual Payment Gate
 - **Option A (Stripe Checkout):** $2,000 instant card payment with automated Notion workspace access.
 - **Option B (SEPA B2B Invoice):** Official B2B invoice with corporate IBAN and European VAT Reverse Charge.""",
-        "status": "Не відправлено"
+        "status": "Draft"
     },
     {
-        "inbox_slot": "Пошта 1",
+        "inbox_slot": "Inbox 1",
         "company": "Vanguard Cargo Logistics GmbH",
-        "country": "🇩🇪 Німеччина (Berlin)",
+        "country": "🇩🇪 Germany (Berlin)",
         "website": "vanguard-cargo.example.de",
-        "industry_problem_x": "Ручний аудит інвойсів 3PL-перевізників на відповідність погодженим тарифним сіткам, паливним надбавкам та демередж-вікнам.",
+        "industry_problem_x": "Manual audit of 3PL carrier freight invoices against agreed tariff grids, dynamic fuel surcharges, and demurrage windows.",
         "contact_role": "Maximilian Weber (Chief Operating Officer)",
         "verified_email": "m.weber@vanguard-cargo.example.de",
         "mx_status": "Verified MX (Microsoft 365) + HTTP 200 Live",
@@ -179,14 +179,14 @@ Isolated deterministic processing; zero data leakage; GDPR enterprise agreement.
 ### 6. Dual Payment Gate
 - **Option A (Stripe Checkout):** $2,000 corporate card payment with instant Notion workspace access.
 - **Option B (SEPA B2B Invoice):** Official B2B invoice with corporate IBAN and European VAT Reverse Charge.""",
-        "status": "Відправлено"
+        "status": "Sent"
     },
     {
-        "inbox_slot": "Пошта 2",
+        "inbox_slot": "Inbox 2",
         "company": "NovaFlow Intelligence Ltd",
-        "country": "🇺🇦 Україна (Kyiv)",
+        "country": "🇺🇦 Ukraine (Kyiv)",
         "website": "novaflow.example.ua",
-        "industry_problem_x": "Розсинхрон між подіями підписок у платіжній системі та правами доступу користувачів у внутрішній CRM/базі даних клієнтів.",
+        "industry_problem_x": "Desynchronization between payment processor subscription webhook events and user entitlement permissions in internal CRM databases.",
         "contact_role": "Maksym Boyko (VP of Product Engineering)",
         "verified_email": "maksym@novaflow.example.ua",
         "mx_status": "Verified MX (Google Workspace) + HTTP 200 Live",
@@ -260,7 +260,7 @@ Zero public LLM exposure; air-gapped deterministic validation; GDPR compliant.
 ### 6. Dual Payment Gate
 - **Option A (Stripe Checkout):** $2,000 corporate card payment with instant Notion workspace access.
 - **Option B (SEPA B2B Invoice):** Official B2B invoice with corporate IBAN and European VAT Reverse Charge.""",
-        "status": "Отримано відповідь"
+        "status": "Replied"
     }
 ]
 

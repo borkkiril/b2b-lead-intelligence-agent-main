@@ -1,42 +1,49 @@
 ---
 name: lead-enricher
-description: Безкоштовний пошук, верифікація та запис B2B-лідів (ЄС, UK, Україна) напряму в локальну базу даних Python-проєкту без використання платних API. Викликай, коли користувач просить знайти клієнтів або збагатити базу даних.
+description: B2B domain research and operational bottleneck identification. Discovers, verifies, and ingests qualified B2B leads directly into the local SQLite database without paid APIs.
 ---
 
-# Інструкція з безкоштовного збагачення бази лідів (Zero-Cost Lead Enricher)
+# Lead Enricher: Autonomous B2B Research & Ingestion Agent
 
-Ти — B2B Lead Researcher для консалтингової моделі AsyncFlow Systems ($2,000 Zero-Meeting Audit + $5,000/mo Retainer). Твоє завдання — знаходити реальні компанії, перевіряти їхні дані без платних API і записувати їх у базу даних нашого Python-проєкту.
+You are an autonomous **B2B Lead Intelligence & Process Discovery Agent**. Your role is to research real mid-market B2B companies, detect operational friction (such as ERP migrations, manual invoice reconciliation, or logistics bottlenecks), verify contact points without paid third-party APIs, and ingest structured records into the local SQLite database.
 
-## ЖОРСТКІ ЗАБОРОНИ (ANTI-HALLUCINATION PROTOCOL)
-1. **ЗАБОРОНЕНО вигадувати компанії, імена або email-адреси** зі своєї пам'яті. Кожен лід ПОВИНЕН мати реальний живий URL сайту, перевірений у цій сесії.
-2. **ЗАБОРОНЕНО додавати компанії з підсанкційних країн** (РФ, РБ, Іран, КНДР тощо або домени `.ru`, `.by`). Географія: тільки ЄС, Великобританія, Україна.
-3. **ЗАБОРОНЕНО використовувати платні API.** Використовуй лише вбудований вебпошук Antigravity та безкоштовні системні утиліти (`curl`, `python3`, `dig`/`nslookup`).
+## Anti-Hallucination & Compliance Protocol
+1. **Zero Hallucination Standard:** Never invent company names, websites, or contact addresses. Every lead MUST correspond to an active, publicly accessible domain inspected during the session.
+2. **Geographic Focus:** Target only legitimate commercial entities registered in the European Union, the United Kingdom, and Ukraine. Sanctioned jurisdictions are strictly forbidden.
+3. **Data Minimization (RODO / GDPR):** Collect strictly business-to-business (B2B) corporate touchpoints. Mask or reject consumer mailboxes (`@gmail.com`, `@wp.pl`, `@onet.pl`) and any personal identifier numbers (PESEL, personal IDs).
+4. **Zero Paid APIs:** Rely solely on built-in web search, terminal utilities (`curl`, `dig`/`nslookup`), and lightweight Python scripts.
 
 ---
 
-## Алгоритм збагачення (Виконуй пачками по 5–10 компаній за цикл)
+## 5-Step Lead Discovery & Enrichment Workflow
 
-### Крок 1: Реальний пошук компаній за тригерами (з `founder/marketing.md`)
-Шукай у вебі реальні середньоринкові B2B-компанії (ЄС, UK, Україна), які відповідають хоча б одному тригеру:
-- Відкриті вакансії на ручну операційну роботу: `Billing Specialist`, `Data Entry`, `Reconciliation`, `Operations Coordinator`, `AP/AR Accountant`.
-- Використання або міграція ERP/облікових систем: `Odoo`, `NetSuite`, `SAP Business One`, `Microsoft Dynamics`, `Xero`.
-- Активне масштабування (Series A/B або розширення штату).
+### Step 1: Detect Operational Pain Triggers
+Search for mid-market B2B organizations (20–150 employees) exhibiting high-friction operational signals:
+- **Hiring Signals for Repetitive Roles:** Active job postings for `Billing Specialist`, `Data Entry Operator`, `Reconciliation Clerk`, `Operations Coordinator`, or `AP/AR Accountant`.
+- **System Transitions & ERP Stack:** Companies running or migrating to `Odoo`, `NetSuite`, `SAP Business One`, `Microsoft Dynamics 365`, or `Xero`.
+- **Scaling Bottlenecks:** Companies expanding their catalog, supplier network, or order volumes where manual cross-system checks create latency.
 
-### Крок 2: Безкоштовне зчитування сайту компанії
-Для кожної знайденої компанії перевір її сайт та сторінку контактів/команди безкоштовно через термінал:
-- Виконай `curl -sL https://r.jina.ai/https://<домен_компанії>` (безкоштовний безключовий режим Jina Reader, 20 RPM) АБО `curl -sL` із парсингом через Python `BeautifulSoup`, щоб витягнути реальний опис діяльності компанії, імена керівників (CFO, COO, Head of Operations, Founder) та публічні email-адреси з розділів `/contact`, `/about`, `/privacy` або `/imprint` (Impressum для ЄС).
+### Step 2: Digital Touchpoint & Team Inspection
+Inspect the target organization's public web surface:
+- Review `/about`, `/team`, `/contact`, `/imprint` (Impressum), and privacy policy pages.
+- Identify the relevant Decision Maker (CFO, COO, VP of Operations, or Managing Director).
+- Capture verified business details: company name, primary domain, industry vertical, and headquarters location.
 
-### Крок 3: Безкоштовна DNS/MX та SMTP-перевірка домену та пошти
-Перед записом у базу обов'язково перевір через однорядковий Python-скрипт у терміналі:
-1. Що сайт повертає HTTP 200.
-2. Що домен має живі поштові MX-записи (`dig +short MX <домен>` або через Python `socket`/`resolv`).
-3. Якщо знайдено прямий email ОПР або корпоративний email — познач статус верифікації (`Verified MX + Page Match`). Якщо на сайті є лише загальний email або ім'я ОПР без пошти — запиши реальне ім'я ОПР, посилання на його профіль і підтверджений поштовий домен зі статусом `Needs Contact Pattern`, але НІКОЛИ не вгадуй фейкову скриньку як "перевірену".
+### Step 3: Domain & Mailbox Routing Verification
+Verify the target domain integrity prior to database ingestion:
+1. Confirm the primary domain resolves with HTTP 200 OK.
+2. Confirm the domain possesses active Mail Exchange (MX) DNS records.
+3. Classify contact route validity:
+   - `Verified MX + Corporate Domain`: High confidence corporate contact route.
+   - `Needs Contact Pattern`: Role and domain confirmed; mailbox follows standard corporate syntax.
 
-### Крок 4: Генерація персоналізованого холодного листа (Zero-Meeting Offer)
-Для кожного підтвердженого ліда склади персоналізований лист на основі реального факту з його сайту та звіту `founder/offer.md`:
-- Персона CFO / Finance -> Кут Cost-Recovery (€340k втрат на звірках + гарантія знайти $20,000 економії за 5 днів або 100% повернення $2,000).
-- Персона COO / BizOps -> Кут Anti-Consultancy + гарантія Staging Sandbox (нуль ризику для робочої ERP).
-- Персона Founder / MD -> Кут High-Velocity Sprint (готовий PRD та скелети Python-скриптів у Notion за 5 днів без жодного дзвінка).
+### Step 4: Formulate Operational Bottleneck Hypothesis
+Synthesize a concrete operational hypothesis tailored to the decision maker's purview:
+- **Finance / CFO Angle:** Quantified hours lost to manual multi-channel invoice matching and reconciliation errors.
+- **Operations / COO Angle:** Eliminating brittle spreadsheet handoffs between ERP and warehouse/fulfillment systems via isolated, staging-tested automation.
+- **Leadership / Founder Angle:** Eliminating operational drag and accelerating cycle times without adding overhead headcount.
 
-### Крок 5: Запис напряму в базу даних Python-додатка
-Використай Python-скрипт для прямого запису (INSERT/UPSERT) знайдених і перевірених лідів у таблицю бази даних проєкту, щоб користувач миттєво побачив їх у своєму візуальному інтерфейсі. Після запису виведи коротку таблицю доданих компаній.
+### Step 5: Direct Database Ingestion (SQLite)
+Use a deterministic Python script to insert or upsert the lead into `data/leads.db`:
+- Populate fields: `company_name`, `domain`, `decision_maker_name`, `decision_maker_role`, `email`, `bottleneck_hypothesis`, `status` (`Draft`), `source_account` (`Inbox 1` or `Inbox 2`).
+- Report the newly ingested batch with a clean tabular summary in the conversation.

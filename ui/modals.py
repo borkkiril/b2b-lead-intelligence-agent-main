@@ -1,8 +1,8 @@
 """
-Модальні вікна для B2B Lead Database Dashboard:
-1. Детальний перегляд Листа №1 (Plain Text без посилань, згідно з 2-Step No-Link Funnel).
-2. Перегляд Notion Adaptation Blueprint (Матеріал для Листа №2: $2,000 Zero-Meeting Offer + 10x ROI).
-3. Повне досьє компанії з верифікацією, тригерами та контактами.
+Modal dialogs for B2B Lead Intelligence Dashboard:
+1. Letter 1 Plain-Text Preview (0-link cold email deliverability standard).
+2. Notion Architecture Blueprint Preview (Letter 2 asset: $2,000 Zero-Meeting Offer + 10x ROI model).
+3. Complete Company Dossier with verified routing, pain triggers, and contact points.
 """
 
 import os
@@ -34,7 +34,7 @@ from ui.theme import (
 )
 
 def launch_system_browser(target: str):
-    """Відкриває сайт чи посилання у браузері."""
+    """Opens a website or URL in the default system browser."""
     if not target:
         return
     if target.startswith("http://") or target.startswith("https://"):
@@ -55,8 +55,8 @@ def launch_system_browser(target: str):
             except Exception:
                 pass
 
-def copy_to_clipboard(page: ft.Page, text: str, success_message: str = "Скопійовано в буфер обміну!"):
-    """Копіює текст у буфер та показує спливаюче сповіщення."""
+def copy_to_clipboard(page: ft.Page, text: str, success_message: str = "Copied to clipboard!"):
+    """Copies text to system clipboard and displays a floating notification toast."""
     try:
         page.set_clipboard(text)
     except Exception:
@@ -75,15 +75,15 @@ def copy_to_clipboard(page: ft.Page, text: str, success_message: str = "Скоп
 
 def create_email_preview_dialog(page: ft.Page, account: dict, on_update_status):
     """
-    Модальне вікно перегляду Листа №1:
-    Plain Text без жодних посилань (http/https). Захід через проблему Х + пропозиція надіслати Notion.
+    Modal dialog inspecting Letter 1:
+    100% Plain Text without external hyperlinks (http/https). Grounded in operational bottleneck hypothesis.
     """
-    name = account.get("company") or account.get("name", "Компанія")
+    name = account.get("company") or account.get("name", "Company")
     contact_role = account.get("contact_role") or "Decision Maker"
     email = account.get("verified_email") or account.get("decision_maker", {}).get("primary_email", "—")
-    inbox_slot = account.get("inbox_slot", "Пошта 1")
+    inbox_slot = account.get("inbox_slot", "Inbox 1")
     
-    plain_email = account.get("email_step1_plain_text") or account.get("cold_email", "(Текст листа формується...)")
+    plain_email = account.get("email_step1_plain_text") or account.get("cold_email", "(Email copy generating...)")
     cr_first = contact_role.split()[0] if contact_role and contact_role != "Decision Maker" else "there"
     followup_email = account.get("email_step1_5_followup") or (
         f"Hi {cr_first},\n\n"
@@ -93,7 +93,6 @@ def create_email_preview_dialog(page: ft.Page, account: dict, on_update_status):
         f"Best regards,\n"
         f"AsyncFlow Systems"
     )
-    current_status = account.get("status") or account.get("outreach_status", "Не відправлено")
 
     def close_dlg(e=None):
         try:
@@ -103,12 +102,12 @@ def create_email_preview_dialog(page: ft.Page, account: dict, on_update_status):
             page.update()
 
     def do_copy_body(e):
-        copy_to_clipboard(page, plain_email, "Текст Листа №1 скопійовано!")
+        copy_to_clipboard(page, plain_email, "Letter 1 text copied to clipboard!")
 
     def do_mark_sent(e):
-        on_update_status(account, "Відправлено")
+        on_update_status(account, "Sent")
         close_dlg()
-        copy_to_clipboard(page, plain_email, "Лист скопійовано і статус оновлено на 'Відправлено'!")
+        copy_to_clipboard(page, plain_email, "Email copied and status updated to 'Sent'!")
 
     content = ft.Container(
         width=740,
@@ -122,9 +121,9 @@ def create_email_preview_dialog(page: ft.Page, account: dict, on_update_status):
                 content=ft.Column([
                     ft.Row([
                         ft.Icon(ft.Icons.PERSON_ROUNDED, size=18, color=COLOR_PRIMARY),
-                        ft.Text(f"Отримувач: {contact_role}", size=FONT_BODY, weight=ft.FontWeight.BOLD, color=TEXT_PRIMARY),
+                        ft.Text(f"Recipient: {contact_role}", size=FONT_BODY, weight=ft.FontWeight.BOLD, color=TEXT_PRIMARY),
                         ft.Container(expand=True),
-                        ft.Text(f"Скринька: {inbox_slot}", size=FONT_CAPTION, weight=ft.FontWeight.BOLD, color=COLOR_INDIGO),
+                        ft.Text(f"Inbox: {inbox_slot}", size=FONT_CAPTION, weight=ft.FontWeight.BOLD, color=COLOR_INDIGO),
                     ]),
                     ft.Divider(height=8, color=BORDER_COLOR),
                     ft.Row([
@@ -132,7 +131,7 @@ def create_email_preview_dialog(page: ft.Page, account: dict, on_update_status):
                         ft.Text(f"Email: {email}", size=FONT_BODY, color=TEXT_PRIMARY),
                         ft.Container(expand=True),
                         ft.Container(
-                            content=ft.Text("100% Plain Text • Без посилань", size=FONT_TAG, weight=ft.FontWeight.BOLD, color=COLOR_SUCCESS),
+                            content=ft.Text("100% Plain Text • Zero Links", size=FONT_TAG, weight=ft.FontWeight.BOLD, color=COLOR_SUCCESS),
                             bgcolor=COLOR_SUCCESS_LIGHT,
                             padding=ft.Padding.symmetric(horizontal=8, vertical=4),
                             border_radius=6
@@ -141,7 +140,7 @@ def create_email_preview_dialog(page: ft.Page, account: dict, on_update_status):
                 ], spacing=6)
             ),
 
-            # Email Body Container (Лист №1)
+            # Email Body Container (Letter 1)
             ft.Container(
                 bgcolor=BG_PAGE,
                 border_radius=8,
@@ -150,10 +149,10 @@ def create_email_preview_dialog(page: ft.Page, account: dict, on_update_status):
                 content=ft.Column([
                     ft.Row([
                         ft.Icon(ft.Icons.MARK_EMAIL_READ_ROUNDED, size=16, color=COLOR_PRIMARY),
-                        ft.Text("Лист №1: Plain Text (День 1, без посилань, вхід через проблему Х):", size=FONT_CAPTION, weight=ft.FontWeight.BOLD, color=TEXT_MUTED),
+                        ft.Text("Letter 1: Plain Text (Day 1, 0 links, operational problem focus):", size=FONT_CAPTION, weight=ft.FontWeight.BOLD, color=TEXT_MUTED),
                         ft.Container(expand=True),
                         ft.OutlinedButton(
-                            "Скопіювати Лист №1",
+                            "Copy Letter 1",
                             icon=ft.Icons.CONTENT_COPY_ROUNDED,
                             on_click=do_copy_body,
                             style=ft.ButtonStyle(color=COLOR_PRIMARY)
@@ -173,7 +172,7 @@ def create_email_preview_dialog(page: ft.Page, account: dict, on_update_status):
                 ], spacing=4)
             ),
 
-            # Follow-up Container (Лист №1.5 через 48 годин)
+            # Follow-up Container (Letter 1.5 after 48h)
             ft.Container(
                 bgcolor=COLOR_INDIGO_LIGHT,
                 border_radius=8,
@@ -182,12 +181,12 @@ def create_email_preview_dialog(page: ft.Page, account: dict, on_update_status):
                 content=ft.Column([
                     ft.Row([
                         ft.Icon(ft.Icons.UPDATE_ROUNDED, size=16, color=COLOR_INDIGO),
-                        ft.Text("Лист №1.5: Змістовний Follow-up (через 48 годин, Staging Sandbox + $20k гарантія):", size=FONT_CAPTION, weight=ft.FontWeight.BOLD, color=COLOR_INDIGO),
+                        ft.Text("Letter 1.5: Substantive Follow-up (48h delay, Staging Sandbox + ROI model):", size=FONT_CAPTION, weight=ft.FontWeight.BOLD, color=COLOR_INDIGO),
                         ft.Container(expand=True),
                         ft.OutlinedButton(
-                            "Скопіювати Лист №1.5",
+                            "Copy Follow-up",
                             icon=ft.Icons.CONTENT_COPY_ROUNDED,
-                            on_click=lambda e: copy_to_clipboard(page, followup_email, "Лист №1.5 (Follow-up) скопійовано!"),
+                            on_click=lambda e: copy_to_clipboard(page, followup_email, "Letter 1.5 (Follow-up) copied!"),
                             style=ft.ButtonStyle(color=COLOR_INDIGO)
                         )
                     ]),
@@ -210,13 +209,13 @@ def create_email_preview_dialog(page: ft.Page, account: dict, on_update_status):
     dlg = ft.AlertDialog(
         title=ft.Row([
             ft.Icon(ft.Icons.EMAIL_ROUNDED, color=COLOR_PRIMARY, size=22),
-            ft.Text(f"Лист №1: {name}", size=FONT_DIALOG_TITLE, weight=ft.FontWeight.BOLD),
+            ft.Text(f"Letter 1: {name}", size=FONT_DIALOG_TITLE, weight=ft.FontWeight.BOLD),
         ], spacing=8),
         content=content,
         actions=[
-            ft.TextButton("Закрити", on_click=close_dlg),
+            ft.TextButton("Close", on_click=close_dlg),
             ft.FilledButton(
-                "📋 Скопіювати та позначити 'Відправлено'",
+                "📋 Copy & Mark as 'Sent'",
                 icon=ft.Icons.SEND_ROUNDED,
                 style=ft.ButtonStyle(bgcolor=COLOR_SUCCESS, color=ft.Colors.WHITE),
                 on_click=do_mark_sent
@@ -230,11 +229,11 @@ def create_email_preview_dialog(page: ft.Page, account: dict, on_update_status):
 
 def create_blueprint_preview_dialog(page: ft.Page, account: dict):
     """
-    Модальне вікно перегляду Notion Adaptation Blueprint (Лист №2):
-    Готовий структурований контент сторінки Notion під $2,000 Zero-Meeting Offer та 10x ROI гарантію.
+    Modal dialog inspecting Notion Architecture Blueprint (Letter 2 asset):
+    Structured Notion architecture specification designed for async review with ROI models.
     """
-    name = account.get("company") or account.get("name", "Компанія")
-    blueprint_text = account.get("notion_adaptation_blueprint") or "Notion Blueprint формується..."
+    name = account.get("company") or account.get("name", "Company")
+    blueprint_text = account.get("notion_adaptation_blueprint") or "Notion Blueprint generating..."
 
     def close_dlg(e=None):
         try:
@@ -244,7 +243,7 @@ def create_blueprint_preview_dialog(page: ft.Page, account: dict):
             page.update()
 
     def do_copy(e):
-        copy_to_clipboard(page, blueprint_text, "Notion Blueprint скопійовано!")
+        copy_to_clipboard(page, blueprint_text, "Notion Blueprint copied to clipboard!")
 
     content = ft.Container(
         width=740,
@@ -257,8 +256,8 @@ def create_blueprint_preview_dialog(page: ft.Page, account: dict):
                 content=ft.Row([
                     ft.Icon(ft.Icons.DESCRIPTION_ROUNDED, color=COLOR_INDIGO, size=20),
                     ft.Column([
-                        ft.Text(f"Notion Adaptation Blueprint для {name}", size=FONT_BODY, weight=ft.FontWeight.BOLD, color=COLOR_INDIGO),
-                        ft.Text("Контент відправляється у Листі №2 після згоди клієнта на ознайомлення.", size=FONT_CAPTION, color=TEXT_MUTED)
+                        ft.Text(f"Notion Architecture Blueprint for {name}", size=FONT_BODY, weight=ft.FontWeight.BOLD, color=COLOR_INDIGO),
+                        ft.Text("Delivered in Letter 2 after prospect requests async overview.", size=FONT_CAPTION, color=TEXT_MUTED)
                     ], spacing=2)
                 ], spacing=10)
             ),
@@ -269,10 +268,10 @@ def create_blueprint_preview_dialog(page: ft.Page, account: dict):
                 border=ft.Border.all(1, BORDER_COLOR),
                 content=ft.Column([
                     ft.Row([
-                        ft.Text("Структура адаптації під клієнта ($2,000 Zero-Meeting Blueprint):", size=FONT_CAPTION, weight=ft.FontWeight.BOLD, color=TEXT_MUTED),
+                        ft.Text("Async Architecture Blueprint Structure ($2,000 Zero-Meeting Offer):", size=FONT_CAPTION, weight=ft.FontWeight.BOLD, color=TEXT_MUTED),
                         ft.Container(expand=True),
                         ft.OutlinedButton(
-                            "Скопіювати Blueprint",
+                            "Copy Blueprint",
                             icon=ft.Icons.CONTENT_COPY_ROUNDED,
                             on_click=do_copy,
                             style=ft.ButtonStyle(color=COLOR_PRIMARY)
@@ -301,9 +300,9 @@ def create_blueprint_preview_dialog(page: ft.Page, account: dict):
         ], spacing=8),
         content=content,
         actions=[
-            ft.TextButton("Закрити", on_click=close_dlg),
+            ft.TextButton("Close", on_click=close_dlg),
             ft.FilledButton(
-                "Скопіювати в буфер",
+                "Copy to Clipboard",
                 icon=ft.Icons.CONTENT_COPY_ROUNDED,
                 style=ft.ButtonStyle(bgcolor=COLOR_PRIMARY, color=ft.Colors.WHITE),
                 on_click=do_copy
@@ -316,16 +315,15 @@ def create_blueprint_preview_dialog(page: ft.Page, account: dict):
     return dlg
 
 def create_account_details_dialog(page: ft.Page, account: dict, on_update_status):
-    """Повне досьє компанії з усіма 11 обов'язковими полями системи."""
-    name = account.get("company") or account.get("name", "Компанія")
+    """Complete company dossier with all 11 required system fields."""
+    name = account.get("company") or account.get("name", "Company")
     website = account.get("website") or account.get("domain", "")
-    country = account.get("country") or account.get("headquarters", "ЄС")
-    inbox_slot = account.get("inbox_slot", "Пошта 1")
+    country = account.get("country") or account.get("headquarters", "EU")
+    inbox_slot = account.get("inbox_slot", "Inbox 1")
     contact_role = account.get("contact_role") or "—"
     email = account.get("verified_email") or account.get("decision_maker", {}).get("primary_email", "—")
     problem = account.get("industry_problem_x") or account.get("operational_pain_trigger", "—")
     mx_status = account.get("mx_status") or "Verified MX + HTTP 200 Live"
-    current_status = account.get("status") or account.get("outreach_status", "Не відправлено")
 
     def close_dlg(e=None):
         try:
@@ -376,7 +374,7 @@ def create_account_details_dialog(page: ft.Page, account: dict, on_update_status
                 content=ft.Column([
                     ft.Row([
                         ft.Icon(ft.Icons.BOLT_ROUNDED, color=COLOR_WARNING, size=18),
-                        ft.Text("Галузева проблема Х (Операційне вузьке місце):", size=FONT_BODY, weight=ft.FontWeight.BOLD, color=TEXT_PRIMARY),
+                        ft.Text("Operational Bottleneck Hypothesis (Industry Problem X):", size=FONT_BODY, weight=ft.FontWeight.BOLD, color=TEXT_PRIMARY),
                     ]),
                     ft.Text(problem, size=FONT_BODY, color=TEXT_PRIMARY)
                 ], spacing=4)
@@ -391,16 +389,16 @@ def create_account_details_dialog(page: ft.Page, account: dict, on_update_status
                 content=ft.Column([
                     ft.Row([
                         ft.Icon(ft.Icons.PERSON_ROUNDED, color=COLOR_PRIMARY, size=18),
-                        ft.Text(f"ОПР / Роль: {contact_role}", size=FONT_BODY, weight=ft.FontWeight.BOLD, color=TEXT_PRIMARY),
+                        ft.Text(f"Decision Maker / Role: {contact_role}", size=FONT_BODY, weight=ft.FontWeight.BOLD, color=TEXT_PRIMARY),
                     ]),
                     ft.Row([
                         ft.Icon(ft.Icons.ALTERNATE_EMAIL_ROUNDED, color=COLOR_PRIMARY, size=16),
-                        ft.Text(f"Email: {email}", size=FONT_BODY, weight=ft.FontWeight.W_600, color=COLOR_PRIMARY),
+                        ft.Text(f"Business Email: {email}", size=FONT_BODY, weight=ft.FontWeight.W_600, color=COLOR_PRIMARY),
                         ft.IconButton(
                             icon=ft.Icons.CONTENT_COPY_ROUNDED,
-                            tooltip="Скопіювати email",
+                            tooltip="Copy email",
                             icon_size=16,
-                            on_click=lambda e: copy_to_clipboard(page, email, "Email скопійовано!")
+                            on_click=lambda e: copy_to_clipboard(page, email, "Email copied to clipboard!")
                         )
                     ])
                 ], spacing=4)
@@ -414,7 +412,7 @@ def create_account_details_dialog(page: ft.Page, account: dict, on_update_status
                 border_radius=8,
                 content=ft.Row([
                     ft.Icon(ft.Icons.VERIFIED_ROUNDED, color=COLOR_SUCCESS, size=18),
-                    ft.Text(f"Статус верифікації: {mx_status} • Санкційний скринінг: 100% OK", size=FONT_BODY, color=COLOR_SUCCESS, weight=ft.FontWeight.W_500)
+                    ft.Text(f"Verification Status: {mx_status} • Sanctions Screening: 100% Cleared", size=FONT_BODY, color=COLOR_SUCCESS, weight=ft.FontWeight.W_500)
                 ], spacing=6)
             )
         ], spacing=10, scroll=ft.ScrollMode.AUTO)
@@ -423,13 +421,13 @@ def create_account_details_dialog(page: ft.Page, account: dict, on_update_status
     dlg = ft.AlertDialog(
         title=ft.Row([
             ft.Icon(ft.Icons.INFO_ROUNDED, color=COLOR_PRIMARY, size=22),
-            ft.Text(f"Досьє компанії: {name}", size=FONT_DIALOG_TITLE, weight=ft.FontWeight.BOLD),
+            ft.Text(f"Company Dossier: {name}", size=FONT_DIALOG_TITLE, weight=ft.FontWeight.BOLD),
         ]),
         content=content,
         actions=[
-            ft.TextButton("Закрити", on_click=close_dlg),
+            ft.TextButton("Close", on_click=close_dlg),
             ft.FilledButton(
-                "✉️ Лист №1 (Plain Text)",
+                "✉️ Letter 1 (Plain Text)",
                 icon=ft.Icons.EMAIL_ROUNDED,
                 style=ft.ButtonStyle(bgcolor=COLOR_PRIMARY, color=ft.Colors.WHITE),
                 on_click=lambda e: (close_dlg(), create_email_preview_dialog(page, account, on_update_status))

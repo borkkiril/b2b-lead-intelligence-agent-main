@@ -1,6 +1,6 @@
 """
-Верхня панель (Header) для B2B Lead Intelligence Dashboard.
-Відображає назву, лічильники бази (розподіл за скриньками, статуси) та кнопку оновлення.
+Header navigation bar for B2B Lead Intelligence Dashboard.
+Displays application title, real-time database telemetry counters (inboxes, statuses), and refresh action.
 """
 
 import flet as ft
@@ -43,22 +43,22 @@ class DashboardHeader(ft.Container):
 
     def build_ui(self):
         total = len(self.accounts)
-        inbox_1 = sum(1 for a in self.accounts if a.get("inbox_slot") == "Пошта 1")
-        inbox_2 = sum(1 for a in self.accounts if a.get("inbox_slot") == "Пошта 2")
+        inbox_1 = sum(1 for a in self.accounts if a.get("inbox_slot") in ("Inbox 1", "Пошта 1"))
+        inbox_2 = sum(1 for a in self.accounts if a.get("inbox_slot") in ("Inbox 2", "Пошта 2"))
         verified = sum(1 for a in self.accounts if a.get("is_verified_live") or "Verified" in a.get("mx_status", ""))
-        not_sent = sum(1 for a in self.accounts if (a.get("status") or a.get("outreach_status") or "Не відправлено") == "Не відправлено")
-        sent = sum(1 for a in self.accounts if (a.get("status") or a.get("outreach_status")) == "Відправлено")
-        replied = sum(1 for a in self.accounts if (a.get("status") or a.get("outreach_status")) == "Отримано відповідь")
+        not_sent = sum(1 for a in self.accounts if (a.get("status") or a.get("outreach_status") or "Draft") in ("Draft", "Не відправлено"))
+        sent = sum(1 for a in self.accounts if (a.get("status") or a.get("outreach_status")) in ("Sent", "Відправлено"))
+        replied = sum(1 for a in self.accounts if (a.get("status") or a.get("outreach_status")) in ("Replied", "Отримано відповідь", "Відповіли"))
 
         # Metric Badges
         metric_badges = ft.Row([
-            self._metric_badge("Всього", str(total), COLOR_PRIMARY, COLOR_PRIMARY_LIGHT, ft.Icons.FOLDER_SPECIAL_ROUNDED),
-            self._metric_badge("Пошта 1 (10/д)", str(inbox_1), COLOR_INDIGO, COLOR_INDIGO_LIGHT, ft.Icons.MARK_EMAIL_READ_ROUNDED),
-            self._metric_badge("Пошта 2 (10/д)", str(inbox_2), COLOR_INDIGO, COLOR_INDIGO_LIGHT, ft.Icons.ALL_INBOX_ROUNDED),
+            self._metric_badge("Total", str(total), COLOR_PRIMARY, COLOR_PRIMARY_LIGHT, ft.Icons.FOLDER_SPECIAL_ROUNDED),
+            self._metric_badge("Inbox 1 (10/d)", str(inbox_1), COLOR_INDIGO, COLOR_INDIGO_LIGHT, ft.Icons.MARK_EMAIL_READ_ROUNDED),
+            self._metric_badge("Inbox 2 (10/d)", str(inbox_2), COLOR_INDIGO, COLOR_INDIGO_LIGHT, ft.Icons.ALL_INBOX_ROUNDED),
             self._metric_badge("MX Live", str(verified), COLOR_SUCCESS, COLOR_SUCCESS_LIGHT, ft.Icons.VERIFIED_ROUNDED),
-            self._metric_badge("Не відправлено", str(not_sent), COLOR_WARNING, COLOR_WARNING_LIGHT, ft.Icons.SCHEDULE_ROUNDED),
-            self._metric_badge("Відправлено", str(sent), COLOR_PRIMARY, COLOR_PRIMARY_LIGHT, ft.Icons.SEND_ROUNDED),
-            self._metric_badge("Відповіли", str(replied), COLOR_SUCCESS, COLOR_SUCCESS_LIGHT, ft.Icons.MARK_CHAT_READ_ROUNDED),
+            self._metric_badge("Draft", str(not_sent), COLOR_WARNING, COLOR_WARNING_LIGHT, ft.Icons.SCHEDULE_ROUNDED),
+            self._metric_badge("Sent", str(sent), COLOR_PRIMARY, COLOR_PRIMARY_LIGHT, ft.Icons.SEND_ROUNDED),
+            self._metric_badge("Replied", str(replied), COLOR_SUCCESS, COLOR_SUCCESS_LIGHT, ft.Icons.MARK_CHAT_READ_ROUNDED),
         ], spacing=8, wrap=True)
 
         self.content = ft.Row([
@@ -72,7 +72,7 @@ class DashboardHeader(ft.Container):
                 ),
                 ft.Column([
                     ft.Text("B2B Lead Intelligence Dashboard", size=FONT_HEADER_TITLE, weight=ft.FontWeight.BOLD, color=TEXT_PRIMARY),
-                    ft.Text("AsyncFlow Systems • 20 листів/день (2 особисті пошти) • $2,000 Zero-Meeting Offer", size=FONT_CAPTION, color=TEXT_MUTED),
+                    ft.Text("AI Agentic Intelligence • 20 leads/day • Autonomous Process Automation Showcase", size=FONT_CAPTION, color=TEXT_MUTED),
                 ], spacing=2)
             ], spacing=12),
 
@@ -85,7 +85,7 @@ class DashboardHeader(ft.Container):
 
             # Refresh Button
             ft.FilledButton(
-                "Оновити базу",
+                "Refresh",
                 icon=ft.Icons.REFRESH_ROUNDED,
                 style=ft.ButtonStyle(
                     bgcolor=COLOR_PRIMARY_LIGHT,
