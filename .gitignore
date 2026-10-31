@@ -1,0 +1,41 @@
+# Secrets & Environment
+.env
+*.env.local
+
+# Databases & Local Runtime Data (Zero Leak Standard)
+data/
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+
+# Private Business Strategy & Career Notes (Local Only!)
+founder/
+docs/PORTFOLIO_PITCH.md
+
+# Legacy & Unused Scripts from Previous Iterations
+antigravity/
+telegram_bot.py
+run_bot.sh
+sync_to_notion.py
+run_mobile_web.py
+render.yaml
+metadata.json
+AI-Prospecting-Agent.desktop
+
+# Python Cache, Virtual Env & Build Artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+dist/
+build/
+backups/
+.pytest_cache/
+.DS_Store
+
+# Internal Tooling Vaults
+.skills-vault/
+.gemini/
