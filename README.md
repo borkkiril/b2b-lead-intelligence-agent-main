@@ -12,7 +12,7 @@
 
 > **An AI Agentic Workflow & Business Process Automation Showcase** built with **Antigravity 2.0** and **Gemini**. Demonstrates business process decomposition, two-stage adversarial prompt QA, deterministic RODO/GDPR data minimization, and automated technical solution architecture synthesis.
 
-🚀 **[Experience the Live Interactive Demo](https://borkkiril.github.io/b2b-lead-intelligence-agent/)** — Browse verified leads across EU/UK/Ukraine, inspect plain-text email drafts, test client-side status and market filters, and view generated Architecture Solution Blueprints with calculated ROI models.
+🚀 **[Experience the Live Interactive Demo](https://borkkiril.github.io/b2b-lead-intelligence-agent-main/)** — Browse verified leads across EU/UK/Ukraine, inspect plain-text email drafts, test client-side status and market filters, and view generated Architecture Solution Blueprints with calculated ROI models.
 
 ---
 
