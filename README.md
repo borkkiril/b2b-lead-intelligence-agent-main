@@ -1,6 +1,6 @@
 # B2B Lead Intelligence Agent & Workflow Automation Showcase
 
-[![Live Interactive Demo](https://img.shields.io/badge/%F0%9F%9A%80%20Live%20Interactive%20Demo-GitHub%20Pages-2563EB?style=for-the-badge&logo=github&logoColor=white)](https://borkkiril.github.io/b2b-lead-intelligence-agent/)
+[![Live Interactive Demo](https://img.shields.io/badge/%F0%9F%9A%80%20Live%20Interactive%20Demo-GitHub%20Pages-2563EB?style=for-the-badge&logo=github&logoColor=white)](https://borkkiril.github.io/b2b-lead-intelligence-agent-main/)
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg?logo=python&logoColor=white)](https://www.python.org/)
 [![Agentic Framework](https://img.shields.io/badge/Agentic-Antigravity%202.0-8A2BE2.svg)](https://antigravity.google)
